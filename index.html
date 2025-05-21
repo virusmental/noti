@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Notificações</title>
+  <link rel="icon" href="https://i.postimg.cc/L8bB7Kcg/Design-sem-nome.png">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    img.logo {
+      width: 150px;
+    }
+    .container {
+      margin-top: 20px;
+    }
+    button, select, input {
+      padding: 10px;
+      margin: 10px 0;
+      width: 100%;
+      max-width: 300px;
+      font-size: 16px;
+    }
+    .hidden {
+      display: none;
+    }
+    .box {
+      border: 1px solid #ddd;
+      padding: 20px;
+      display: inline-block;
+      border-radius: 8px;
+    }
+    button {
+      background-color: #0c5;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="https://i.postimg.cc/L8bB7Kcg/Design-sem-nome.png" alt="Logo" class="logo">
+    <h1>Gerador de Notificações</h1>
+
+    <div id="permissionBox" class="box">
+      <button onclick="solicitarPermissao()">Permitir Notificações</button>
+    </div>
+
+    <div id="configBox" class="box hidden">
+      <label>Tipo de notificação:</label>
+      <select id="tipo">
+        <option value="Venda Aprovada!">Venda Aprovada!</option>
+        <option value="Pix Gerado!">Pix Gerado!</option>
+      </select>
+
+      <label>Texto da notificação:</label>
+      <input type="text" id="texto" placeholder="Ex: Valor: R$ 79,90">
+
+      <label>Intervalo entre notificações (segundos):</label>
+      <input type="number" id="intervalo" value="5">
+
+      <label>Número de notificações:</label>
+      <input type="number" id="quantidade" value="1">
+
+      <button onclick="iniciarNotificacoes()">Iniciar Notificações</button>
+    </div>
+  </div>
+
+  <script>
+    function solicitarPermissao() {
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          document.getElementById("permissionBox").classList.add("hidden");
+          document.getElementById("configBox").classList.remove("hidden");
+        } else {
+          alert("Permissão de notificações negada.");
+        }
+      });
+    }
+
+    function exibirNotificacao(titulo, corpo) {
+      new Notification(titulo, {
+        body: corpo,
+        icon: "https://i.postimg.cc/L8bB7Kcg/Design-sem-nome.png"
+      });
+    }
+
+    function iniciarNotificacoes() {
+      const tipo = document.getElementById("tipo").value;
+      const texto = document.getElementById("texto").value;
+      const intervalo = parseInt(document.getElementById("intervalo").value) * 1000;
+      const quantidade = parseInt(document.getElementById("quantidade").value);
+
+      let contador = 0;
+      const intervaloId = setInterval(() => {
+        exibirNotificacao(tipo + "\nde Kiwify", texto);
+        contador++;
+        if (contador >= quantidade) {
+          clearInterval(intervaloId);
+        }
+      }, intervalo);
+    }
+  </script>
+</body>
+</html>
