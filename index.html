@@ -1,109 +1,407 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerador de Notificações</title>
-  <link rel="icon" href="https://i.postimg.cc/L8bB7Kcg/Design-sem-nome.png">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    img.logo {
-      width: 150px;
-    }
-    .container {
-      margin-top: 20px;
-    }
-    button, select, input {
-      padding: 10px;
-      margin: 10px 0;
-      width: 100%;
-      max-width: 300px;
-      font-size: 16px;
-    }
-    .hidden {
-      display: none;
-    }
-    .box {
-      border: 1px solid #ddd;
-      padding: 20px;
-      display: inline-block;
-      border-radius: 8px;
-    }
-    button {
-      background-color: #0c5;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Notificações</title>
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="Aplicativo para gerar notificações personalizadas">
+    <link rel="manifest" href="/manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @media (max-width: 640px) {
+            .container {
+                width: 95%;
+            }
+        }
+        
+        .notification-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background-color: #4f46e5;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: #f1f5f9;
+            color: #1e293b;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+            transform: translateY(-2px);
+        }
+        
+        .input-field {
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s forwards;
+        }
+        
+        .slide-out {
+            animation: slideOut 0.5s forwards;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(-100%); opacity: 0; }
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
-<body>
-  <div class="container">
-    <img src="https://i.postimg.cc/L8bB7Kcg/Design-sem-nome.png" alt="Logo" class="logo">
-    <h1>Gerador de Notificações</h1>
-
-    <div id="permissionBox" class="box">
-      <button onclick="solicitarPermissao()">Permitir Notificações</button>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto max-w-md bg-white rounded-xl shadow-lg overflow-hidden p-6">
+        <!-- Initial Screen -->
+        <div id="initialScreen" class="text-center">
+            <img src="https://i.postimg.cc/L8bB7Kcg/Design-sem-nome.png" alt="Logo" class="notification-icon mx-auto mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">Gerador de Notificações</h1>
+            <p class="text-gray-600 mb-8">Crie notificações personalizadas para testar ou demonstrar funcionalidades</p>
+            <button id="permitBtn" class="btn-primary w-full py-3 px-4 rounded-lg font-medium text-lg mb-4">
+                <i class="fas fa-bell mr-2"></i> Permitir Notificações
+            </button>
+            <div id="installContainer" class="hidden">
+                <button id="installBtn" class="btn-secondary w-full py-3 px-4 rounded-lg font-medium text-lg">
+                    <i class="fas fa-download mr-2"></i> Instalar App
+                </button>
+            </div>
+        </div>
+        
+        <!-- Configuration Screen -->
+        <div id="configScreen" class="hidden">
+            <div class="flex items-center mb-6">
+                <button id="backBtn" class="text-gray-500 mr-4">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <h2 class="text-2xl font-bold text-gray-800">Configurar Notificação</h2>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Tipo de Notificação</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="saleBtn" class="notification-type-btn btn-secondary py-3 px-4 rounded-lg font-medium flex items-center justify-center border-2 border-transparent">
+                            <i class="fas fa-shopping-cart mr-2"></i> Venda Aprovada!
+                        </button>
+                        <button id="pixBtn" class="notification-type-btn btn-secondary py-3 px-4 rounded-lg font-medium flex items-center justify-center border-2 border-transparent">
+                            <i class="fas fa-money-bill-wave mr-2"></i> Pix Gerado!
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="notificationText" class="block text-gray-700 font-medium mb-2">Texto da notificação</label>
+                    <input type="text" id="notificationText" class="input-field w-full py-3 px-4 rounded-lg" placeholder="Ex: Valor: R$ 79,90">
+                </div>
+                
+                <div>
+                    <label for="interval" class="block text-gray-700 font-medium mb-2">Intervalo entre notificações (segundos)</label>
+                    <input type="number" id="interval" min="1" value="5" class="input-field w-full py-3 px-4 rounded-lg">
+                </div>
+                
+                <div>
+                    <label for="count" class="block text-gray-700 font-medium mb-2">Número de notificações</label>
+                    <input type="number" id="count" min="1" value="1" class="input-field w-full py-3 px-4 rounded-lg">
+                </div>
+                
+                <button id="startBtn" class="btn-primary w-full py-3 px-4 rounded-lg font-medium text-lg mt-4">
+                    <i class="fas fa-play mr-2"></i> Iniciar Notificações
+                </button>
+            </div>
+        </div>
     </div>
 
-    <div id="configBox" class="box hidden">
-      <label>Tipo de notificação:</label>
-      <select id="tipo">
-        <option value="Venda Aprovada!">Venda Aprovada!</option>
-        <option value="Pix Gerado!">Pix Gerado!</option>
-      </select>
-
-      <label>Texto da notificação:</label>
-      <input type="text" id="texto" placeholder="Ex: Valor: R$ 79,90">
-
-      <label>Intervalo entre notificações (segundos):</label>
-      <input type="number" id="intervalo" value="5">
-
-      <label>Número de notificações:</label>
-      <input type="number" id="quantidade" value="1">
-
-      <button onclick="iniciarNotificacoes()">Iniciar Notificações</button>
-    </div>
-  </div>
-
-  <script>
-    function solicitarPermissao() {
-      Notification.requestPermission().then(permission => {
-        if (permission === "granted") {
-          document.getElementById("permissionBox").classList.add("hidden");
-          document.getElementById("configBox").classList.remove("hidden");
-        } else {
-          alert("Permissão de notificações negada.");
+    <script>
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
         }
-      });
-    }
 
-    function exibirNotificacao(titulo, corpo) {
-      new Notification(titulo, {
-        body: corpo,
-        icon: "https://i.postimg.cc/L8bB7Kcg/Design-sem-nome.png"
-      });
-    }
+        // DOM Elements
+        const initialScreen = document.getElementById('initialScreen');
+        const configScreen = document.getElementById('configScreen');
+        const permitBtn = document.getElementById('permitBtn');
+        const backBtn = document.getElementById('backBtn');
+        const saleBtn = document.getElementById('saleBtn');
+        const pixBtn = document.getElementById('pixBtn');
+        const notificationText = document.getElementById('notificationText');
+        const interval = document.getElementById('interval');
+        const count = document.getElementById('count');
+        const startBtn = document.getElementById('startBtn');
+        const installContainer = document.getElementById('installContainer');
+        const installBtn = document.getElementById('installBtn');
 
-    function iniciarNotificacoes() {
-      const tipo = document.getElementById("tipo").value;
-      const texto = document.getElementById("texto").value;
-      const intervalo = parseInt(document.getElementById("intervalo").value) * 1000;
-      const quantidade = parseInt(document.getElementById("quantidade").value);
+        // Variables
+        let selectedNotificationType = 'sale';
+        let deferredPrompt;
 
-      let contador = 0;
-      const intervaloId = setInterval(() => {
-        exibirNotificacao(tipo + "\nde Kiwify", texto);
-        contador++;
-        if (contador >= quantidade) {
-          clearInterval(intervaloId);
+        // Event Listeners
+        permitBtn.addEventListener('click', requestNotificationPermission);
+        backBtn.addEventListener('click', goBackToInitialScreen);
+        saleBtn.addEventListener('click', () => selectNotificationType('sale'));
+        pixBtn.addEventListener('click', () => selectNotificationType('pix'));
+        startBtn.addEventListener('click', startNotifications);
+        
+        // PWA Installation
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installContainer.classList.remove('hidden');
+        });
+
+        installBtn.addEventListener('click', () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    } else {
+                        console.log('User dismissed the install prompt');
+                    }
+                    deferredPrompt = null;
+                    installContainer.classList.add('hidden');
+                });
+            }
+        });
+
+        // Functions
+        function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                alert('Este navegador não suporta notificações desktop');
+                return;
+            }
+
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    showConfigScreen();
+                } else {
+                    alert('Você precisa permitir notificações para usar este aplicativo');
+                }
+            });
         }
-      }, intervalo);
-    }
-  </script>
+
+        function showConfigScreen() {
+            initialScreen.classList.add('slide-out');
+            setTimeout(() => {
+                initialScreen.classList.add('hidden');
+                initialScreen.classList.remove('slide-out');
+                configScreen.classList.remove('hidden');
+                configScreen.classList.add('slide-in');
+            }, 500);
+        }
+
+        function goBackToInitialScreen() {
+            configScreen.classList.add('slide-out');
+            setTimeout(() => {
+                configScreen.classList.add('hidden');
+                configScreen.classList.remove('slide-out');
+                initialScreen.classList.remove('hidden');
+                initialScreen.classList.add('slide-in');
+            }, 500);
+        }
+
+        function selectNotificationType(type) {
+            selectedNotificationType = type;
+            
+            // Reset all buttons
+            document.querySelectorAll('.notification-type-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-500');
+                btn.classList.remove('bg-indigo-50');
+            });
+            
+            // Highlight selected button
+            if (type === 'sale') {
+                saleBtn.classList.add('border-indigo-500');
+                saleBtn.classList.add('bg-indigo-50');
+                notificationText.placeholder = "Ex: Valor: R$ 79,90 | Produto: Camiseta";
+            } else {
+                pixBtn.classList.add('border-indigo-500');
+                pixBtn.classList.add('bg-indigo-50');
+                notificationText.placeholder = "Ex: Valor: R$ 150,00 | De: João Silva";
+            }
+        }
+
+        function startNotifications() {
+            const text = notificationText.value.trim();
+            const intervalValue = parseInt(interval.value) * 1000;
+            const countValue = parseInt(count.value);
+            
+            if (!text) {
+                alert('Por favor, insira o texto da notificação');
+                return;
+            }
+            
+            if (isNaN(intervalValue) || intervalValue <= 0) {
+                alert('Por favor, insira um intervalo válido');
+                return;
+            }
+            
+            if (isNaN(countValue) || countValue <= 0) {
+                alert('Por favor, insira um número válido de notificações');
+                return;
+            }
+            
+            let notificationsSent = 0;
+            const notificationInterval = setInterval(() => {
+                if (notificationsSent >= countValue) {
+                    clearInterval(notificationInterval);
+                    return;
+                }
+                
+                sendNotification();
+                notificationsSent++;
+                
+                if (notificationsSent >= countValue) {
+                    clearInterval(notificationInterval);
+                }
+            }, intervalValue);
+            
+            // Send first notification immediately
+            sendNotification();
+            notificationsSent++;
+        }
+
+        function sendNotification() {
+            const title = selectedNotificationType === 'sale' ? 'Venda Aprovada!' : 'Pix Gerado!';
+            const text = notificationText.value.trim();
+            const icon = 'https://i.postimg.cc/L8bB7Kcg/Design-sem-nome.png';
+            
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(title, {
+                    body: text,
+                    icon: icon
+                });
+            } else if ('serviceWorker' in navigator && 'PushManager' in window) {
+                // Fallback for PWA
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification(title, {
+                        body: text,
+                        icon: icon
+                    });
+                });
+            }
+        }
+
+        // Initialize
+        selectNotificationType('sale');
+    </script>
+
+    <!-- Service Worker -->
+    <script>
+        // This script will be used to generate the service-worker.js file
+        const serviceWorkerContent = `
+            const CACHE_NAME = 'notification-generator-v1';
+            const ASSETS_TO_CACHE = [
+                '/',
+                '/index.html',
+                'https://i.postimg.cc/L8bB7Kcg/Design-sem-nome.png',
+                'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+                'https://cdn.tailwindcss.com'
+            ];
+
+            self.addEventListener('install', (event) => {
+                event.waitUntil(
+                    caches.open(CACHE_NAME)
+                        .then((cache) => cache.addAll(ASSETS_TO_CACHE))
+                );
+            });
+
+            self.addEventListener('fetch', (event) => {
+                event.respondWith(
+                    caches.match(event.request)
+                        .then((response) => response || fetch(event.request))
+                );
+            });
+
+            self.addEventListener('notificationclick', (event) => {
+                event.notification.close();
+                event.waitUntil(
+                    clients.matchAll({ type: 'window' })
+                        .then((clientList) => {
+                            if (clientList.length > 0) {
+                                return clientList[0].focus();
+                            }
+                            return clients.openWindow('/');
+                        })
+                );
+            });
+        `;
+
+        // Create a blob URL for the service worker
+        const blob = new Blob([serviceWorkerContent], { type: 'application/javascript' });
+        const serviceWorkerUrl = URL.createObjectURL(blob);
+
+        // This would normally be in a separate service-worker.js file
+        // For this example, we're including it inline
+    </script>
+
+    <!-- Manifest -->
+    <script>
+        // This script will be used to generate the manifest.json file
+        const manifestContent = {
+            "name": "Gerador de Notificações",
+            "short_name": "Notificações",
+            "start_url": "/",
+            "display": "standalone",
+            "background_color": "#ffffff",
+            "theme_color": "#4f46e5",
+            "description": "Aplicativo para gerar notificações personalizadas",
+            "icons": [
+                {
+                    "src": "https://i.postimg.cc/L8bB7Kcg/Design-sem-nome.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://i.postimg.cc/L8bB7Kcg/Design-sem-nome.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        };
+
+        // Create a blob URL for the manifest
+        const manifestBlob = new Blob([JSON.stringify(manifestContent)], { type: 'application/json' });
+        const manifestUrl = URL.createObjectURL(manifestBlob);
+
+        // This would normally be in a separate manifest.json file
+        // For this example, we're including it inline
+    </script>
 </body>
 </html>
